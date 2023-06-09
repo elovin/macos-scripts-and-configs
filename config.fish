@@ -1,5 +1,44 @@
 #!/usr/bin/env fish
 
+
+function gspush --description 'git add all then stash'
+	git add -A :/ && git stash
+end
+
+
+function gspop --description 'git stash apply'
+	git stash apply
+end
+
+
+function switch-context --wraps="kubectl config use-context" 
+	 kubectl config use-context $argv
+end
+
+complete -c switch-context -a "kubectl config use-context"
+
+
+function use-context --wraps="kubectl config use-context" 
+	 kubectl config use-context $argv
+end
+
+complete -c use-context -a "kubectl config use-context"
+
+
+
+function encrypt-using-7z
+	7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=32m -ms=on -mhe=on encrypted-content $argv -p
+end
+
+# add rust to path using fish
+set -gx PATH "$HOME/.cargo/bin" $PATH;
+
+alias myip="curl -4 icanhazip.com"
+
+starship init fish | source
+
+alias ni="npm ci"
+
 # git removing ALL local branches which do no longer exist on the remote (git fetch --prune is not engough!)
 
 function git-prune-branches-dry-run
@@ -11,8 +50,10 @@ function git-prune-branches
 end
 
 
-
 # colima (similar to WSL2 but for macos)
+
+alias docker-stop-all='docker stop (docker ps -a -q)'
+
 
 function docker	
 	echo "Starting colima if its not running yet ..."
