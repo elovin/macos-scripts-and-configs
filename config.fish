@@ -1,5 +1,8 @@
 #!/usr/bin/env fish
 
+# install homebrew apps as regular user as opposed to root
+set -xg HOMEBREW_CASK_OPTS "--appdir=~/Applications"
+
 
 function gspush --description 'git add all then stash'
 	git add -A :/ && git stash
@@ -120,8 +123,8 @@ end
 # change ctrl+c to whatever you want to trigger the interrupt
 stty intr '^f'
 
-# upgrade all tools installed through homebrew including gui tools, even if the gui tools provide auto updates
-alias uu="fnm install --lts && brew update && brew outdated && brew upgrade && brew upgrade --cask --greedy"
+# upgrade tools installed through homebrew and node installed through fnm
+alias uu="fnm install --lts && fnm use lts-latest && fnm default (node --version) && brew update && brew outdated && brew upgrade && brew upgrade --cask --greedy"
 
 function rm
 	echo "dont use rm, use trash-put instead!"
