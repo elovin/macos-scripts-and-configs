@@ -1,6 +1,5 @@
 #!/usr/bin/env fish
 
-# install homebrew apps as regular user as opposed to root
 set -xg HOMEBREW_CASK_OPTS "--appdir=~/Applications"
 
 
@@ -9,9 +8,11 @@ function gspush --description 'git add all then stash'
 end
 
 
+
 function gspop --description 'git stash apply'
 	git stash apply
 end
+
 
 
 function switch-context --wraps="kubectl config use-context" 
@@ -21,11 +22,30 @@ end
 complete -c switch-context -a "kubectl config use-context"
 
 
+
 function use-context --wraps="kubectl config use-context" 
 	 kubectl config use-context $argv
 end
 
 complete -c use-context -a "kubectl config use-context"
+
+
+
+function show-contexts --wraps="kubectl config get-contexts" 
+	 kubectl config get-contexts $argv
+end
+
+complete -c show-contexts -a "kubectl config get-contexts"
+
+
+
+function list-contexts --wraps="kubectl config get-contexts" 
+	 kubectl config get-contexts $argv
+end
+
+complete -c list-contexts -a "kubectl config get-contexts"
+
+
 
 
 
@@ -123,7 +143,7 @@ end
 # change ctrl+c to whatever you want to trigger the interrupt
 stty intr '^f'
 
-# upgrade tools installed through homebrew and node installed through fnm
+# upgrade all tools installed through homebrew including gui tools, even if the gui tools provide auto updates
 alias uu="fnm install --lts && fnm use lts-latest && fnm default (node --version) && brew update && brew outdated && brew upgrade && brew upgrade --cask --greedy"
 
 function rm
