@@ -1,82 +1,16 @@
 #!/usr/bin/env fish
 
-set -xg HOMEBREW_CASK_OPTS "--appdir=~/Applications"
-
-
-function gspush --description 'git add all then stash'
-	git add -A :/ && git stash
-end
-
-
-
-function gspop --description 'git stash apply'
-	git stash apply
-end
-
-
-
-function switch-context --wraps="kubectl config use-context" 
-	 kubectl config use-context $argv
-end
-
-complete -c switch-context -a "kubectl config use-context"
-
-
-
-function use-context --wraps="kubectl config use-context" 
-	 kubectl config use-context $argv
-end
-
-complete -c use-context -a "kubectl config use-context"
-
-
-
-function show-contexts --wraps="kubectl config get-contexts" 
-	 kubectl config get-contexts $argv
-end
-
-complete -c show-contexts -a "kubectl config get-contexts"
-
-
-
-function list-contexts --wraps="kubectl config get-contexts" 
-	 kubectl config get-contexts $argv
-end
-
-complete -c list-contexts -a "kubectl config get-contexts"
-
-
-
-
+#--------------------------------------------------------------------------------------------------------------------
+#### Encryption custom funcations / Special (function) Aliases
 
 function encrypt-using-7z
 	7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=32m -ms=on -mhe=on encrypted-content $argv -p
 end
 
-# add rust to path using fish
-set -gx PATH "$HOME/.cargo/bin" $PATH;
-
-alias myip="curl -4 icanhazip.com"
-
-starship init fish | source
-
-alias ni="npm ci"
-
-# git removing ALL local branches which do no longer exist on the remote (git fetch --prune is not engough!)
-
-function git-prune-branches-dry-run
-	bash -c 'git fetch -p ; git branch -r | awk \'{print $1}\' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk \'{print $1}\''
-end
-
-function git-prune-branches
-	git-prune-branches-dry-run | xargs git branch -D
-end
-
-
-# colima (similar to WSL2 but for macos)
+#--------------------------------------------------------------------------------------------------------------------
+#### Colima (similar to WSL2 but for macos) custom funcations / Special (function) Aliases
 
 alias docker-stop-all='docker stop (docker ps -a -q)'
-
 
 function docker	
 	echo "Starting colima if its not running yet ..."
@@ -95,22 +29,9 @@ function docker-compose
 	/opt/homebrew/bin/docker-compose $argv
 end
 
-#mysql tools
-fish_add_path /opt/homebrew/opt/mysql-client/bin
 
-# add all binaries installed with homebrew
-fish_add_path -a /usr/local/bin
-fish_add_path -a /opt/homebrew/bin
-
-alias ku="kubectl"
-alias kx="kubectx"
-
-# nvm has been replaced with fnm
-#load_nvm
-# use the latest lts release as the default
-#nvm alias default "lts/*"
-
-# image helper functions
+#--------------------------------------------------------------------------------------------------------------------
+#### Image custom funcations / Special (function) Aliases
 
 
 function to64x64png
@@ -118,8 +39,39 @@ function to64x64png
 end
 
 
+#--------------------------------------------------------------------------------------------------------------------
+#### Kubernetes custom funcations / Special (function) Aliases
 
-# kubernetes helper functions
+function switch-context --wraps="kubectl config use-context" 
+	kubectl config use-context $argv
+end
+
+complete -c switch-context -a "kubectl config use-context"
+
+
+
+function use-context --wraps="kubectl config use-context" 
+	kubectl config use-context $argv
+end
+
+complete -c use-context -a "kubectl config use-context"
+
+
+
+function show-contexts --wraps="kubectl config get-contexts" 
+	kubectl config get-contexts $argv
+end
+
+complete -c show-contexts -a "kubectl config get-contexts"
+
+
+
+function list-contexts --wraps="kubectl config get-contexts" 
+	kubectl config get-contexts $argv
+end
+
+complete -c list-contexts -a "kubectl config get-contexts"
+
 
 function pod-logs
 	if not set -q argv[1]; or not set -q argv[2]
@@ -140,44 +92,32 @@ function describe-pod
 end
 
 
-# change ctrl+c to whatever you want to trigger the interrupt
-stty intr '^f'
-
-# upgrade all tools installed through homebrew including gui tools, even if the gui tools provide auto updates
-alias uu="fnm install --lts && fnm use lts-latest && fnm default (node --version) && brew update && brew outdated && brew upgrade && brew upgrade --cask --greedy"
-
+#--------------------------------------------------------------------------------------------------------------------
+#### RM custom funcations / Special (function) Aliases
 function rm
 	echo "dont use rm, use trash-put instead!"
 end
 
-alias uuidv4="uuidgen | tr '[:upper:]' '[:lower:]'"
+#--------------------------------------------------------------------------------------------------------------------
+#### Git custom funcations / Special (function) Aliases
+
+function gspush --description 'git add all then stash'
+	git add -A :/ && git stash
+end
 
 
-# nvm update aliases
+function gspop --description 'git stash apply'
+	git stash apply
+end
 
-#function upgrade-node
-#	set current_node (node --version)
-#	nvm use node
-#	nvm install node --latest-npm --reinstall-packages-from=node
-#	nvm use "$current_node"
-#end
+# git removing ALL local branches which do no longer exist on the remote (git fetch --prune is not engough!)
+function git-prune-branches-dry-run
+	bash -c 'git fetch -p ; git branch -r | awk \'{print $1}\' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk \'{print $1}\''
+end
 
-#function upgrade-node-lts
-#	load_nvm
-#	set current_node (node --version)
-#	echo "$current_node"
-#	nvm use --lts
-#	nvm install "lts/*" --reinstall-packages-from=(nvm current)
-#	echo "$current_node"
-#	nvm use "$current_node"
-#end
-
-# git aliases 
-
-
-alias gst="git status"
-alias gaa="git add -A :/"
-alias glog="git log"
+function git-prune-branches
+	git-prune-branches-dry-run | xargs git branch -D
+end
 
 function gdiff
 	if not set -q argv[1]
@@ -186,8 +126,6 @@ function gdiff
 		git diff "$argv[1]"
 	end
 end
-
-
 
 
 function gdiffs
@@ -199,26 +137,57 @@ function gdiffs
 end
 
 
+#--------------------------------------------------------------------------------------------------------------------
+#### Simple aliases
 
-function greset
-	if not set -q argv[1]
-		git reset
-	else
-		git reset "$argv[1]"
-	end
-end
+alias gst="git status"
+alias gaa="git add -A :/"
+alias glog="git log"
+
+# service from a red hat developer to check your ip
+alias myip="curl -4 icanhazip.com"
+
+alias ni="npm ci"
+
+alias uuidv4="uuidgen | tr '[:upper:]' '[:lower:]'"
+
+# upgrade all tools installed through homebrew including gui tools, even if the gui tools provide auto updates
+alias uu="fnm install --lts && fnm use lts-latest && fnm default (node --version) && brew update && brew outdated && brew upgrade && brew upgrade --cask --greedy"
+
+alias ku="kubectl"
+alias kx="kubectx"
+
+#--------------------------------------------------------------------------------------------------------------------
+#### Special settings
 
 
-function gcomm
-	echo "$argv[1]"
-end
+# change ctrl+c to whatever you want to trigger the interrupt
+stty intr '^f'
 
-function grollback
-	git reset "$argv[1]"
-	git restore "$argv[1]"
-end
+#--------------------------------------------------------------------------------------------------------------------
+#### Add FISH Completions
 
+
+starship init fish | source
 /opt/homebrew/bin/direnv hook fish | source
 kubectl completion fish | source
 
+#--------------------------------------------------------------------------------------------------------------------
+#### PATHS and ENV variables
+
+# install GUI AKA CASK tools to home folder to avoid sudo which causes lots of problems with admin by request
+set -xg HOMEBREW_CASK_OPTS "--appdir=~/Applications"
+
+# kubernetes plugins
 set -gx PATH $PATH $HOME/.krew/bin
+
+# add rust to path using fish
+set -gx PATH "$HOME/.cargo/bin" $PATH;
+
+#mysql tools
+fish_add_path /opt/homebrew/opt/mysql-client/bin
+
+# add all binaries installed with homebrew
+fish_add_path -a /usr/local/bin
+fish_add_path -a /opt/homebrew/bin
+#--------------------------------------------------------------------------------------------------------------------
