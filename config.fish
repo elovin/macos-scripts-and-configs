@@ -10,8 +10,12 @@ end
 #--------------------------------------------------------------------------------------------------------------------
 #### Process handling
 
-function kill-all-by-name
-	kill -9 (ps -x | grep "$argv[1]" | awk '{print $1}')
+function force-kill-all-by-name
+	kill -KILL (ps -x | grep "$argv[1]" | awk '{print $1}')
+end
+
+function gracefull-kill-all-by-name
+	kill -TERM (ps -x | grep "$argv[1]" | awk '{print $1}')
 end
 
 #--------------------------------------------------------------------------------------------------------------------
@@ -175,14 +179,14 @@ alias kx="kubectx"
 # upgrade all tools installed through homebrew including gui tools, even if the gui tools provide auto updates
 function uu
 	# close firefox to prevent it from chaning folder permissons
-	kill-all-by-name "firefox" >/dev/null 2>&1
+	gracefull-kill-all-by-name "firefox" >/dev/null 2>&1
 	# unlock firefox files
 	chflags -R nouchg ~/Applications/Firefox.app > /dev/null
 	# run update
 	fish -c "fnm install --lts && fnm use lts-latest && fnm default (node --version) && brew update && brew outdated && brew upgrade && brew cu -a"
 
 	# make sure firefox is not running (again)
-	kill-all-by-name "firefox" >/dev/null 2>&1
+	gracefull-kill-all-by-name "firefox" >/dev/null 2>&1
 
 	# lock firefox files
 	chflags -R uimmutable ~/Applications/Firefox.app >/dev/null 2>&1
