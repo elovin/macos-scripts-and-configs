@@ -92,6 +92,18 @@ end
 complete -c list-contexts -a "kubectl config get-contexts"
 
 
+function get-logs --wraps="kubectl logs"
+      	if not set -q argv[1]; or not set -q argv[2]
+                echo "use this fnc like this: get-logs DEPLOYMENT_NAME NAMESPACE_NAME (you can add more args if you want, e.g. --since=3h --previous=true ...)"
+                return 1
+        end	
+
+	kubectl logs deployment/"$argv[1]" --namespace="$argv[2]" --all-containers=true --timestamps=true $argv[3..-1]
+end
+
+complete -c get-logs -a "kubectl logs"
+
+
 function pod-logs
 	if not set -q argv[1]; or not set -q argv[2]
 		echo "use this fnc like this: pod-logs POD_NAME_SUBSTRING NAMESPACE_NAME"
@@ -113,19 +125,33 @@ end
 
 #--------------------------------------------------------------------------------------------------------------------
 #### RM custom funcations / Special (function) Aliases
-function rm
+function rm --description 'do not use it, use trash-put!'
 	echo "dont use rm, use trash-put instead!"
+	echo "WARNING, passing your args to trash-put!"
+	echo "you have 5 seconds to interrupt this command!"
+	sleep 5
+	trash-put --verbose $argv
+	echo "use trash-list and/or trash-restore to restore the file/dir"
 end
 
 #--------------------------------------------------------------------------------------------------------------------
 #### Git custom funcations / Special (function) Aliases
 
-function gspush --description 'git add all then stash'
+function git-status --wraps="git status"
+	git status $argv
+end
+
+function git-stash-rm-all --description 'stashes everything and then CLEARS the stash!'
+	git add -A :/ && git stash && git stash clear
+end
+
+
+function git-stash-push-all --description 'git add all then stash'
 	git add -A :/ && git stash
 end
 
 
-function gspop --description 'git stash apply'
+function git-stash-pop --description 'git stash apply'
 	git stash apply
 end
 
@@ -138,7 +164,7 @@ function git-prune-branches
 	git-prune-branches-dry-run | xargs git branch -D
 end
 
-function gdiff
+function git-diff-all --description 'show all changes compared to last commit'
 	if not set -q argv[1]
 		git diff
 	else
@@ -147,7 +173,7 @@ function gdiff
 end
 
 
-function gdiffs
+function git-diff-added --description='only include files added to staging (git add ...)'
 	if not set -q argv[1]
 		git diff --staged
 	else
@@ -178,19 +204,7 @@ alias kx="kubectx"
 
 # upgrade all tools installed through homebrew including gui tools, even if the gui tools provide auto updates
 function uu
-	# close firefox to prevent it from chaning folder permissons
-	gracefull-kill-all-by-name "firefox" >/dev/null 2>&1
-	# unlock firefox files
-	chflags -R nouchg ~/Applications/Firefox.app > /dev/null
-	# run update
 	fish -c "fnm install --lts && fnm use lts-latest && fnm default (node --version) && brew update && brew outdated && brew upgrade && brew cu -a"
-
-	# make sure firefox is not running (again)
-	gracefull-kill-all-by-name "firefox" >/dev/null 2>&1
-
-	# lock firefox files
-	chflags -R uimmutable ~/Applications/Firefox.app >/dev/null 2>&1
-
 end
 
 #--------------------------------------------------------------------------------------------------------------------
@@ -213,6 +227,9 @@ kubectl completion fish | source
 
 # install GUI AKA CASK tools to home folder to avoid sudo which causes lots of problems with admin by request
 set -xg HOMEBREW_CASK_OPTS "--appdir=~/Applications"
+
+# set colima docker to default context
+set -xg DOCKER_HOST "unix://$HOME/.colima/default/docker.sock"
 
 # kubernetes plugins
 set -gx PATH $PATH $HOME/.krew/bin
